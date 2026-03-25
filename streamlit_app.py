@@ -8,7 +8,7 @@ st.write("Choose the fruits you want in your custom Smoothie!.")
 
 name_on_order = st.text_input("Name on Smoothie:")
 st.write("The name on your Smoothie will be:", name_on_order)
-
+import requests
 cnx = st.connection("snowflake")
 session = cnx.session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
@@ -23,6 +23,9 @@ if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon") 
+        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+
 
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
             values ('""" + ingredients_string + """', '""" + name_on_order + """')"""
@@ -31,9 +34,5 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
         st.success(f'Your Smoothie is ordered, {name_on_order}!', icon="✅")
 
-import requests  
-# ✅ CORRETTO (solo l'URL tra virgolette)
-smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon") 
-# st.text(smoothiefroot_response.json())
-sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+
 
